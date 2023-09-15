@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
     const [text, setText] = useState<string>('');
@@ -11,7 +11,9 @@ export default function Home() {
 
     const addTodos = () => {
         if (text === '') return;
-        setTodos([...todos, text]);
+        const newTodos = [...todos, text];
+        setTodos(newTodos);
+        localStorage.setItem('todos', JSON.stringify(newTodos));
         setText('');
     };
 
@@ -19,7 +21,15 @@ export default function Home() {
         const newTodos = [...todos];
         newTodos.splice(index, 1);
         setTodos(newTodos);
+        localStorage.setItem('todos', JSON.stringify(newTodos));
     };
+
+    useEffect(() => {
+        const todos = localStorage.getItem('todos');
+        if (todos) {
+            setTodos(JSON.parse(todos));
+        }
+    });
 
     return (
         <>
