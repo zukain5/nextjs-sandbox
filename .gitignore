@@ -36,3 +36,6 @@ next-env.d.ts
 
 # firebase
 firebase-service-account.json
+
+# vscode
+/.vscode/
