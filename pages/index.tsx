@@ -1,24 +1,19 @@
-import { getTodosData } from '@/lib/todos';
-import { GetStaticProps } from 'next';
 import Head from 'next/head';
+import { useState } from 'react';
 
-export const getStaticProps: GetStaticProps = async () => {
-    const allTodosData = getTodosData();
-    return {
-        props: {
-            allTodosData,
-        },
+export default function Home() {
+    const [text, setText] = useState<string>('');
+    const [todos, setTodos] = useState<string[]>([]);
+
+    const changeText = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setText(e.target.value);
     };
-}
 
-export default function Home({
-    allTodosData,
-}: {
-    allTodosData: {
-        id: string;
-        name: string;
-    }[];
-}) {
+    const addTodos = () => {
+        setTodos([...todos, text]);
+        setText('');
+    };
+
     return (
         <>
             <Head>
@@ -26,11 +21,19 @@ export default function Home({
             </Head>
             <main>
                 <h2>TODO List</h2>
-                <ul>
-                    {allTodosData.map(({ id, name }) => (
-                        <li key={id}>{name}</li>
-                    ))}
-                </ul>
+                <div>
+                    <input type="text" value={text} onChange={changeText}/>
+                    <button onClick={addTodos}>Add</button>
+                </div>
+                <div>
+                    <ul>
+                        {todos.map((todo) => (
+                            <li key={todo}>
+                                <p>{todo}</p>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </main>
         </>
     );
