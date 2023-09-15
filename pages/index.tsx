@@ -10,6 +10,7 @@ export default function Home() {
     };
 
     const addTodos = () => {
+        if (text === '') return;
         setTodos([...todos, text]);
         setText('');
     };
