@@ -14,6 +14,12 @@ export default function Home() {
         setText('');
     };
 
+    const deleteTodos = (index: number) => {
+        const newTodos = [...todos];
+        newTodos.splice(index, 1);
+        setTodos(newTodos);
+    };
+
     return (
         <>
             <Head>
@@ -27,9 +33,10 @@ export default function Home() {
                 </div>
                 <div>
                     <ul>
-                        {todos.map((todo) => (
-                            <li key={todo}>
+                        {todos.map((todo, index) => (
+                            <li key={index}>
                                 <p>{todo}</p>
+                                <button onClick={() => deleteTodos(index)}>Delete</button>
                             </li>
                         ))}
                     </ul>
