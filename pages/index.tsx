@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 
 export default function Home() {
   const [text, setText] = useState<string>('');
-  const [todos, setTodos] = useState<string[]>([]);
+  const [todos, setTodos] = useState<Todo[]>([]);
 
   const changeText = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
@@ -13,7 +13,6 @@ export default function Home() {
     if (text === '') return;
     const newTodos = [...todos, text];
     setTodos(newTodos);
-    localStorage.setItem('todos', JSON.stringify(newTodos));
     setText('');
   };
 
@@ -21,15 +20,16 @@ export default function Home() {
     const newTodos = [...todos];
     newTodos.splice(index, 1);
     setTodos(newTodos);
-    localStorage.setItem('todos', JSON.stringify(newTodos));
   };
 
   useEffect(() => {
-    const todos = localStorage.getItem('todos');
-    if (todos) {
-      setTodos(JSON.parse(todos));
-    }
-  });
+    const fetchTodos = async () => {
+      const response = await fetch('/api/todos');
+      const todos = await response.json() as Todo[];
+      setTodos(todos);
+    };
+    fetchTodos();
+  }, []);
 
   return (
     <>
@@ -46,7 +46,7 @@ export default function Home() {
           <ul>
             {todos.map((todo, index) => (
               <li key={index}>
-                <p>{todo}</p>
+                <p>{todo.name}</p>
                 <button onClick={() => deleteTodos(index)}>Delete</button>
               </li>
             ))}
