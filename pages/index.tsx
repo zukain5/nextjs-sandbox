@@ -3,33 +3,56 @@ import React, { useEffect, useState } from 'react';
 
 export default function Home() {
   const [text, setText] = useState<string>('');
-  const [todos, setTodos] = useState<string[]>([]);
+  const [todos, setTodos] = useState<Todo[]>([]);
 
   const changeText = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
   };
 
-  const addTodos = () => {
+  const addTodos = async () => {
     if (text === '') return;
-    const newTodos = [...todos, text];
+    const todo = { name: text };
+    const response = await fetch('/api/todos', {
+      method: 'POST',
+      body: JSON.stringify(todo),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      console.error('Error response from server:', response);
+      return;
+    }
+    const responseBody = await response.json();
+    const newTodos = [...todos, responseBody as Todo];
     setTodos(newTodos);
-    localStorage.setItem('todos', JSON.stringify(newTodos));
     setText('');
   };
 
-  const deleteTodos = (index: number) => {
+  const deleteTodos = async (id: string) => {
     const newTodos = [...todos];
-    newTodos.splice(index, 1);
+    const response = await fetch(`/api/todos/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      console.error('Error response from server:', response);
+      return;
+    }
+    newTodos.splice(
+      newTodos.findIndex((todo) => todo.id === id),
+      1,
+    );
     setTodos(newTodos);
-    localStorage.setItem('todos', JSON.stringify(newTodos));
   };
 
   useEffect(() => {
-    const todos = localStorage.getItem('todos');
-    if (todos) {
-      setTodos(JSON.parse(todos));
-    }
-  });
+    const fetchTodos = async () => {
+      const response = await fetch('/api/todos');
+      const todos = await response.json() as Todo[];
+      setTodos(todos);
+    };
+    fetchTodos();
+  }, []);
 
   return (
     <>
@@ -44,10 +67,10 @@ export default function Home() {
         </div>
         <div>
           <ul>
-            {todos.map((todo, index) => (
-              <li key={index}>
-                <p>{todo}</p>
-                <button onClick={() => deleteTodos(index)}>Delete</button>
+            {todos.map((todo) => (
+              <li key={todo.id}>
+                <p>{todo.name}</p>
+                <button onClick={() => deleteTodos(todo.id)}>Delete</button>
               </li>
             ))}
           </ul>
