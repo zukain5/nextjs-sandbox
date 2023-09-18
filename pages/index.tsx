@@ -60,20 +60,27 @@ export default function Home() {
         <title>Todo</title>
       </Head>
       <main>
-        <h2>TODO List</h2>
-        <div>
-          <input type="text" value={text} onChange={changeText} />
-          <button onClick={addTodos}>Add</button>
+        <div className='hero my-5'>
+          <div className='hero-content text-center'>
+            <h1 className='text-5xl font-bold'>TODO List</h1>
+          </div>
         </div>
-        <div>
-          <ul>
-            {todos.map((todo) => (
-              <li key={todo.id}>
-                <p>{todo.name}</p>
-                <button onClick={() => deleteTodos(todo.id)}>Delete</button>
-              </li>
-            ))}
-          </ul>
+        <div className='text-center my-5'>
+          <input className="input input-bordered input-sm" type="text" value={text} onChange={changeText} />
+          <button className='btn btn-sm mx-4' onClick={addTodos}>Add</button>
+        </div>
+        <div className='divider max-w-lg mx-auto'></div>
+        <div className='my-5'>
+          <table className='table-sm mx-auto'>
+            <tbody>
+              {todos.map((todo) => (
+                <tr key={todo.id}>
+                  <td>{todo.name}</td>
+                  <td><button className='btn btn-sm' onClick={() => deleteTodos(todo.id)}>Delete</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </main>
     </>
