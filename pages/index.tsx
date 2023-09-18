@@ -40,14 +40,12 @@ export default function Home() {
         <h2>TODO List</h2>
         <div>
           <input type="text" value={text} onChange={changeText} />
-          <button onClick={addTodos}>Add</button>
         </div>
         <div>
           <ul>
             {todos.map((todo, index) => (
               <li key={index}>
                 <p>{todo.name}</p>
-                <button onClick={() => deleteTodos(index)}>Delete</button>
               </li>
             ))}
           </ul>
