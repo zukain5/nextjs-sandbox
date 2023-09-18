@@ -17,5 +17,22 @@ export default function handler(
       console.error('Error reading and parsing JSON file:', error);
       res.status(500).json({ error: 'Failed to read JSON file' });
     }
+  } else if (req.method === 'POST') {
+    const { name } = req.body;
+    if (!name) {
+      res.status(400).json({ error: 'Missing name' });
+      return;
+    }
+    try {
+      const fileContents = fs.readFileSync(todosFilePath, 'utf8');
+      const todos = JSON.parse(fileContents);
+      const newTodo = { name };
+      const newTodos = [...todos, newTodo];
+      fs.writeFileSync(todosFilePath, JSON.stringify(newTodos));
+      res.status(200).json(newTodo);
+    } catch (error) {
+      console.error('Error reading and parsing JSON file:', error);
+      res.status(500).json({ error: 'Failed to read JSON file' });
+    }
   }
 }

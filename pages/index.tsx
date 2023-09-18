@@ -9,9 +9,21 @@ export default function Home() {
     setText(e.target.value);
   };
 
-  const addTodos = () => {
+  const addTodos = async () => {
     if (text === '') return;
-    const newTodos = [...todos, text];
+    const todo = { name: text };
+    const newTodos = [...todos, todo];
+    const response = await fetch('/api/todos', {
+      method: 'POST',
+      body: JSON.stringify(todo),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      console.error('Error response from server:', response);
+      return;
+    }
     setTodos(newTodos);
     setText('');
   };
@@ -40,12 +52,14 @@ export default function Home() {
         <h2>TODO List</h2>
         <div>
           <input type="text" value={text} onChange={changeText} />
+          <button onClick={addTodos}>Add</button>
         </div>
         <div>
           <ul>
             {todos.map((todo, index) => (
               <li key={index}>
                 <p>{todo.name}</p>
+                <button onClick={() => deleteTodos(index)}>Delete</button>
               </li>
             ))}
           </ul>
