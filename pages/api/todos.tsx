@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 const todosFilePath = path.join(process.cwd(), 'data/todos.json');
 
@@ -26,10 +27,29 @@ export default function handler(
     try {
       const fileContents = fs.readFileSync(todosFilePath, 'utf8');
       const todos = JSON.parse(fileContents);
-      const newTodo = { name };
+      const newTodo = {
+        id: uuidv4(),
+        name,
+      };
       const newTodos = [...todos, newTodo];
       fs.writeFileSync(todosFilePath, JSON.stringify(newTodos));
       res.status(200).json(newTodo);
+    } catch (error) {
+      console.error('Error reading and parsing JSON file:', error);
+      res.status(500).json({ error: 'Failed to read JSON file' });
+    }
+  } else if (req.method === 'DELETE') {
+    const { id } = req.query;
+    if (!id) {
+      res.status(400).json({ error: 'Missing id' });
+      return;
+    }
+    try {
+      const fileContents = fs.readFileSync(todosFilePath, 'utf8');
+      const todos = JSON.parse(fileContents) as Todo[];
+      const newTodos = todos.filter((todo) => todo.id !== id);
+      fs.writeFileSync(todosFilePath, JSON.stringify(newTodos));
+      res.status(204).end();
     } catch (error) {
       console.error('Error reading and parsing JSON file:', error);
       res.status(500).json({ error: 'Failed to read JSON file' });

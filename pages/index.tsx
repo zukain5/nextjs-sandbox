@@ -12,7 +12,6 @@ export default function Home() {
   const addTodos = async () => {
     if (text === '') return;
     const todo = { name: text };
-    const newTodos = [...todos, todo];
     const response = await fetch('/api/todos', {
       method: 'POST',
       body: JSON.stringify(todo),
@@ -24,13 +23,25 @@ export default function Home() {
       console.error('Error response from server:', response);
       return;
     }
+    const responseBody = await response.json();
+    const newTodos = [...todos, responseBody as Todo];
     setTodos(newTodos);
     setText('');
   };
 
-  const deleteTodos = (index: number) => {
+  const deleteTodos = async (id: string) => {
     const newTodos = [...todos];
-    newTodos.splice(index, 1);
+    const response = await fetch(`/api/todos/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      console.error('Error response from server:', response);
+      return;
+    }
+    newTodos.splice(
+      newTodos.findIndex((todo) => todo.id === id),
+      1,
+    );
     setTodos(newTodos);
   };
 
@@ -56,10 +67,10 @@ export default function Home() {
         </div>
         <div>
           <ul>
-            {todos.map((todo, index) => (
-              <li key={index}>
+            {todos.map((todo) => (
+              <li key={todo.id}>
                 <p>{todo.name}</p>
-                <button onClick={() => deleteTodos(index)}>Delete</button>
+                <button onClick={() => deleteTodos(todo.id)}>Delete</button>
               </li>
             ))}
           </ul>
