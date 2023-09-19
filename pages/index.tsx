@@ -1,16 +1,32 @@
+import AlertToast from '@/components/AlertToast';
 import Head from 'next/head';
 import React, { useEffect, useState } from 'react';
 
 export default function Home() {
   const [text, setText] = useState<string>('');
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [isErrorToastOpen, setIsErrorToastOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleFailure = (message: string) => {
+    setErrorMessage(message);
+    setIsErrorToastOpen(true);
+  };
+
+  const closeErrorToast = () => {
+    setIsErrorToastOpen(false);
+    setErrorMessage('');
+  };
 
   const changeText = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
   };
 
   const addTodos = async () => {
-    if (text === '') return;
+    if (text === '') {
+      handleFailure('Please enter a todo.')
+      return;
+    }
     const todo = { name: text };
     const response = await fetch('/api/todos', {
       method: 'POST',
@@ -20,7 +36,7 @@ export default function Home() {
       },
     });
     if (!response.ok) {
-      console.error('Error response from server:', response);
+      handleFailure('Failed to add todo.')
       return;
     }
     const responseBody = await response.json();
@@ -35,7 +51,7 @@ export default function Home() {
       method: 'DELETE',
     });
     if (!response.ok) {
-      console.error('Error response from server:', response);
+      handleFailure('Failed to delete todo.')
       return;
     }
     newTodos.splice(
@@ -82,6 +98,7 @@ export default function Home() {
             </tbody>
           </table>
         </div>
+        <AlertToast isOpen={isErrorToastOpen} onClose={closeErrorToast} message={errorMessage} />
       </main>
     </>
   );
