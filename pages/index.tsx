@@ -1,9 +1,22 @@
+import AlertToast from '@/components/AlertToast';
 import Head from 'next/head';
 import React, { useEffect, useState } from 'react';
 
 export default function Home() {
   const [text, setText] = useState<string>('');
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [isErrorToastOpen, setIsErrorToastOpen] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleFailure = () => {
+    setErrorMessage('Error! Task failed successfully.');
+    setIsErrorToastOpen(true);
+  };
+
+  const closeErrorToast = () => {
+    setIsErrorToastOpen(false);
+    setErrorMessage('');
+  };
 
   const changeText = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
@@ -82,6 +95,8 @@ export default function Home() {
             </tbody>
           </table>
         </div>
+        <button onClick={handleFailure}>処理を失敗させる</button>
+        <AlertToast isOpen={isErrorToastOpen} onClose={closeErrorToast} message={errorMessage} />
       </main>
     </>
   );
