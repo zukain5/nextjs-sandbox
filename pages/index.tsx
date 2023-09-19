@@ -5,11 +5,11 @@ import React, { useEffect, useState } from 'react';
 export default function Home() {
   const [text, setText] = useState<string>('');
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [isErrorToastOpen, setIsErrorToastOpen] = useState(true);
+  const [isErrorToastOpen, setIsErrorToastOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleFailure = () => {
-    setErrorMessage('Error! Task failed successfully.');
+  const handleFailure = (message: string) => {
+    setErrorMessage(message);
     setIsErrorToastOpen(true);
   };
 
@@ -23,7 +23,10 @@ export default function Home() {
   };
 
   const addTodos = async () => {
-    if (text === '') return;
+    if (text === '') {
+      handleFailure('Please enter a todo.')
+      return;
+    }
     const todo = { name: text };
     const response = await fetch('/api/todos', {
       method: 'POST',
@@ -33,7 +36,7 @@ export default function Home() {
       },
     });
     if (!response.ok) {
-      console.error('Error response from server:', response);
+      handleFailure('Failed to add todo.')
       return;
     }
     const responseBody = await response.json();
@@ -48,7 +51,7 @@ export default function Home() {
       method: 'DELETE',
     });
     if (!response.ok) {
-      console.error('Error response from server:', response);
+      handleFailure('Failed to delete todo.')
       return;
     }
     newTodos.splice(
@@ -95,7 +98,6 @@ export default function Home() {
             </tbody>
           </table>
         </div>
-        <button onClick={handleFailure}>処理を失敗させる</button>
         <AlertToast isOpen={isErrorToastOpen} onClose={closeErrorToast} message={errorMessage} />
       </main>
     </>
