@@ -1,28 +1,38 @@
-import fs from 'fs';
+import 'dotenv/config';
+import admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
 import { NextApiRequest, NextApiResponse } from 'next';
-import path from 'path';
 
-const todosFilePath = path.join(process.cwd(), 'data/todos.json');
+const serviceAccount = require('../../../firebase-service-account.json');
 
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  if (admin.apps.length === 0) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+  }
+  const db = getFirestore();
+
   if (req.method === 'DELETE') {
     const { id } = req.query;
     if (!id) {
       res.status(400).json({ error: 'Missing id' });
       return;
     }
+    if (typeof id !== 'string') {
+      res.status(400).json({ error: 'Invalid id' });
+      return;
+    }
     try {
-      const fileContents = fs.readFileSync(todosFilePath, 'utf8');
-      const todos = JSON.parse(fileContents) as Todo[];
-      const newTodos = todos.filter((todo) => todo.id !== id);
-      fs.writeFileSync(todosFilePath, JSON.stringify(newTodos));
+      const todosRef = db.collection('todos');
+      await todosRef.doc(id).delete();
       res.status(204).end();
     } catch (error) {
-      console.error('Error reading and parsing JSON file:', error);
-      res.status(500).json({ error: 'Failed to read JSON file' });
+      console.error('Error deleting todo from Firestore:', error);
+      res.status(500).json({ error: 'Failed to delete todo' });
     }
   }
 }
