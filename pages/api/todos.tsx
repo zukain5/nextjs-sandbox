@@ -1,14 +1,9 @@
 import 'dotenv/config';
 import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
-import fs from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 
 const serviceAccount = require('../../firebase-service-account.json');
-const todosFilePath = path.join(process.cwd(), 'data/todos.json');
-
 
 export default async function handler(
   req: NextApiRequest,
@@ -39,8 +34,8 @@ export default async function handler(
       });
       res.status(200).json(todos);
     } catch (error) {
-      console.error('Error reading and parsing JSON file:', error);
-      res.status(500).json({ error: 'Failed to read JSON file' });
+      console.error('Error getting todos from Firestore:', error);
+      res.status(500).json({ error: 'Failed to get todos' });
     }
   } else if (req.method === 'POST') {
     const { name } = req.body;
@@ -49,18 +44,17 @@ export default async function handler(
       return;
     }
     try {
-      const fileContents = fs.readFileSync(todosFilePath, 'utf8');
-      const todos = JSON.parse(fileContents);
+      const todosRef = db.collection('todos');
+      const docRef = await todosRef.add({ name });
+      const doc = await docRef.get();
       const newTodo = {
-        id: uuidv4(),
-        name,
+        id: doc.id,
+        name: doc.data()?.name,
       };
-      const newTodos = [...todos, newTodo];
-      fs.writeFileSync(todosFilePath, JSON.stringify(newTodos));
       res.status(200).json(newTodo);
     } catch (error) {
-      console.error('Error reading and parsing JSON file:', error);
-      res.status(500).json({ error: 'Failed to read JSON file' });
+      console.error('Error adding todo to Firestore:', error);
+      res.status(500).json({ error: 'Failed to add todo' });
     }
   }
 }
