@@ -1,4 +1,5 @@
 import AlertToast from '@/components/AlertToast';
+import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import React, { useEffect, useState } from 'react';
 
@@ -61,6 +62,11 @@ export default function Home() {
     setTodos(newTodos);
   };
 
+  const DynamicStyledFirebaseAuth = dynamic(
+    () => import('@/components/StyledFirebaseAuth'),
+    { ssr: false } // クライアントサイドのみでレンダリング
+  );
+
   useEffect(() => {
     const fetchTodos = async () => {
       const response = await fetch('/api/todos');
@@ -105,6 +111,7 @@ export default function Home() {
           </table>
         </div>
         <AlertToast isOpen={isErrorToastOpen} onClose={closeErrorToast} message={errorMessage} />
+        <DynamicStyledFirebaseAuth />
       </main>
     </>
   );
