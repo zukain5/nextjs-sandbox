@@ -82,7 +82,13 @@ export default function Home() {
           </div>
         </div>
         <div className='text-center my-5'>
-          <input className="input input-bordered input-sm" type="text" value={text} onChange={changeText} />
+          <input
+            className="input input-bordered input-sm"
+            type="text"
+            value={text}
+            onChange={changeText}
+            onKeyDown={(e) => { if (e.key === 'Enter') addTodos() }}
+          />
           <button className='btn btn-sm mx-4' onClick={addTodos}>Add</button>
         </div>
         <div className='divider max-w-lg mx-auto'></div>
