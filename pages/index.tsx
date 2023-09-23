@@ -111,7 +111,7 @@ export default function Home() {
           </table>
         </div>
         <AlertToast isOpen={isErrorToastOpen} onClose={closeErrorToast} message={errorMessage} />
-        <DynamicStyledFirebaseAuth />
+        <DynamicStyledFirebaseAuth /> {/* TODO: I'm not sure it's working properly. */}
       </main>
     </>
   );
