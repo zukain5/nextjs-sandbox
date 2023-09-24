@@ -1,13 +1,42 @@
 import AlertToast from '@/components/AlertToast';
+import firebaseConfig from "@/config/frontend/firebaseConfig";
+import { initializeApp } from "firebase/app";
+import { GoogleAuthProvider, User, getAuth } from 'firebase/auth';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import React, { useEffect, useState } from 'react';
+
+const firebaseApp = initializeApp(firebaseConfig);
+
+// TODO: Login information is not saved in the session.
 
 export default function Home() {
   const [text, setText] = useState<string>('');
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isErrorToastOpen, setIsErrorToastOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [user, setUser] = useState<User | null>(null);
+
+  const uiConfig = {
+    signInFlow: 'popup',
+    signInSuccessUrl: '/',
+    signInOptions: [
+      GoogleAuthProvider.PROVIDER_ID,
+    ],
+    callbacks: {
+      signInSuccessWithAuthResult: (authResult: any) => {
+        setUser(authResult.user);
+        return false;
+      },
+    },
+  };
+
+  const handleSignOut = () => {
+    const auth = getAuth(firebaseApp);
+    auth.signOut().then(() => {
+      setUser(null);
+    });
+  };
 
   const handleFailure = (message: string) => {
     setErrorMessage(message);
@@ -111,7 +140,14 @@ export default function Home() {
           </table>
         </div>
         <AlertToast isOpen={isErrorToastOpen} onClose={closeErrorToast} message={errorMessage} />
-        <DynamicStyledFirebaseAuth /> {/* TODO: I'm not sure it's working properly. */}
+        {user ? (
+          <>
+            <p>You are signed in as {user.email}.</p>
+            <button onClick={handleSignOut}>Sign out</button>
+          </>
+        ) : (
+          <DynamicStyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={getAuth(firebaseApp)} />
+        )}
       </main>
     </>
   );
